@@ -1,4 +1,5 @@
 import React from "react";
+import "./App.css";
 import Sketch from "react-p5";
 
 let board = [
@@ -12,11 +13,11 @@ let human = "O";
 let currentPlayer = human;
 let height = 500;
 let width = 500;
-export default (props) => {
-  let one_box_weight, one_box_height;
+let one_box_weight = 0, one_box_height = 0;
+const Tic = (props) => {
+
   const setup = (p5, canvasParentRef, mousePressed) => {
-    // use parent to render the canvas in this ref
-    // (without that p5 will render the canvas outside of your component)
+
     p5.createCanvas(500, 500).parent(canvasParentRef);
     one_box_weight = width / 3;
     one_box_height = height / 3;
@@ -38,24 +39,25 @@ export default (props) => {
         let spot = board[i][j];
         p5.textSize(32);
         let r = one_box_weight / 4;
-        if (spot == human) {
+        if (spot === human) {
           p5.noFill();
           p5.ellipse(x, y, r * 2);
-        } else if (spot == ai) {
+        } else if (spot === ai) {
           p5.line(x - r, y - r, x + r, y + r);
           p5.line(x + r, y - r, x - r, y + r);
         }
       }
     }
     const mousePressed = (p5) => {
-      if (currentPlayer == human) {
+      if (currentPlayer === human) {
         let i = p5.floor(p5.mouseX / one_box_weight);
         let j = p5.floor(p5.mouseY / one_box_height);
-
-        if (board[i][j] == "") {
-          board[i][j] = human;
-          currentPlayer = ai;
-          bestMove();
+        if (i < 3 && j < 3) {
+          if (board[i][j] === "") {
+            board[i][j] = human;
+            currentPlayer = ai;
+            bestMove();
+          }
         }
       }
     };
@@ -63,10 +65,10 @@ export default (props) => {
 
     function bestMove() {
       let bestScore = -Infinity;
-      let move;
+      let move = {};
       for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
-          if (board[i][j] == "") {
+          if (board[i][j] === "") {
             board[i][j] = ai;
             let score = minimax(board, 0, false);
             board[i][j] = "";
@@ -77,7 +79,10 @@ export default (props) => {
           }
         }
       }
-      board[move.i][move.j] = ai;
+      if (Object.keys(move).length !== 0) {
+        board[move.i][move.j] = ai;
+      }
+
       currentPlayer = human;
     }
 
@@ -98,7 +103,7 @@ export default (props) => {
         for (let i = 0; i < 3; i++) {
           for (let j = 0; j < 3; j++) {
             // Is the spot available?
-            if (board[i][j] == "") {
+            if (board[i][j] === "") {
               board[i][j] = ai;
               let score = minimax(board, depth + 1, false);
               board[i][j] = "";
@@ -112,7 +117,7 @@ export default (props) => {
         for (let i = 0; i < 3; i++) {
           for (let j = 0; j < 3; j++) {
             // Is the spot available?
-            if (board[i][j] == "") {
+            if (board[i][j] === "") {
               board[i][j] = human;
               let score = minimax(board, depth + 1, true);
               board[i][j] = "";
@@ -125,7 +130,7 @@ export default (props) => {
     }
 
     function equals3(a, b, c) {
-      return a == b && b == c && a != "";
+      return a === b && b === c && a !== "";
     }
 
     function checkWinner() {
@@ -154,13 +159,13 @@ export default (props) => {
       let openSpots = 0;
       for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
-          if (board[i][j] == "") {
+          if (board[i][j] === "") {
             openSpots++;
           }
         }
       }
 
-      if (winner == null && openSpots == 0) {
+      if (winner === null && openSpots === 0) {
         return "tie";
       } else {
         return winner;
@@ -171,14 +176,24 @@ export default (props) => {
     if (result != null) {
       p5.noLoop();
       let resultP = p5.createP("");
+      resultP.class("result-message"); // Apply a common class
+
       resultP.style("font-size", "32pt");
-      if (result == "tie") {
+      if (result === "tie") {
+
         resultP.html("Tie!");
       } else {
-        resultP.html(`${result} wins!  `);
+        resultP.html(`${result} wins!   Try Again`);
       }
     }
-  };
 
-  return <Sketch setup={setup} draw={draw} />;
+   
+  }
+
+  return <div className="container">
+    <h2 className="title">Be Efficient with the one unbeaten</h2>
+    <Sketch setup={setup} draw={draw} />
+
+  </div>;
 };
+export default Tic
